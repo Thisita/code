@@ -1,0 +1,22 @@
+#!/usr/bin/bash
+DOTFILES=$HOME/dotfiles
+
+# Git will be ran non-interactive so we can't accept the key yet
+INSECURE_SSH=ssh -o "StrictHostKeyChecking=no"
+
+if [[ -z "$DOTFILES_GIT" ]]
+then
+    GIT_SSH=$INSECURE_SSH git clone "$DOTFILES_GIT" "$DOTFILES"
+    for dotfile in "$DOTFILES"\.*
+    do
+        # Skip git files
+        if [[ $dotfile == ".git" ]]; then continue; fi
+        if [[ $dotfile == ".gitignore" ]]; then continue; fi
+        if [[ $dotfile == ".dockerignore" ]]; then continue; fi
+
+        echo "Linking $dotfile..."
+        ln -s $dotfile "$HOME/$dotfile"
+    done
+
+    if [[ -p "$DOTFILES/install.sh" ]]; then bash "$DOTFILES/install.sh"; fi
+fi
